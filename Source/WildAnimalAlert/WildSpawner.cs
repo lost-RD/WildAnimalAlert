@@ -51,21 +51,32 @@ namespace RD_WildAnimalAlert
 			}
 			int randomInRange = pawnKindDef.wildSpawn_GroupSizeRange.RandomInRange;
 			int radius = Mathf.CeilToInt(Mathf.Sqrt((float)pawnKindDef.wildSpawn_GroupSizeRange.max));
+			string text = "DEBUG STRING: something went wrong, contact lost_RD with details";
+			float animals_before_current_spawns = this._CurrentTotalAnimalNumber;
+
+			if (randomInRange > 1)
+			{
+				text = String.Concat(new string[] { "A group of ", randomInRange.ToString() , " wild ", pawnKindDef.label, " appeared!"});
+			}
+				
+			//Find.LetterStack.ReceiveLetter("A wild " + newThing.Label + " appeared!", newThing.gender.ToString() + " " + newThing.Label + "\n\n" + newThing.ageTracker.AgeBiologicalYears + " years old\n\nIf you no longer wish to see these messages, disable RD_WildAnimalAlert in the Mods menu.", LetterType.Good, new TargetInfo(loc2, map, false), null);
+
 			for (int i = 0; i < randomInRange; i++)
 			{
 				IntVec3 loc2 = CellFinder.RandomClosewalkCellNear(loc, this.map, radius);
 				Pawn newThing = PawnGenerator.GeneratePawn(pawnKindDef, null);
 				GenSpawn.Spawn(newThing, loc2, this.map);
-				if (this._CurrentTotalAnimalNumber < 4)
+				if (randomInRange == 1)
 				{
-					string text = String.Concat(new string[] { "A wild ", newThing.Label, " appeared! ",
+					text = String.Concat(new string[] { "A wild ", newThing.Label, " appeared! ",
 					newThing.gender.ToString(), " ", newThing.Label, ", ",
 					newThing.ageTracker.AgeBiologicalYears.ToString(), " years old. ",
 					});
-					Messages.Message(text, new TargetInfo(loc2, map, false), MessageSound.Standard);
-					//	Find.LetterStack.ReceiveLetter("A wild " + newThing.Label + " appeared!", newThing.gender.ToString() + " " + newThing.Label + "\n\n" + newThing.ageTracker.AgeBiologicalYears + " years old\n\nIf you no longer wish to see these messages, disable RD_WildAnimalAlert in the Mods menu.", LetterType.Good, new TargetInfo(loc2, map, false), null);
 				}
-
+			}
+			if (animals_before_current_spawns <= 5)
+			{
+				Messages.Message(text, new TargetInfo(loc, map, false), MessageSound.Standard);
 			}
 		}
 	}
