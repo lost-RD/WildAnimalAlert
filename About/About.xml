@@ -5,12 +5,14 @@
 
     <author>lost_RD</author>
 
-    <url></url>
+    <url>https://ludeon.com/forums/index.php?topic=21938</url>
 
-    <targetVersion>0.16.1393</targetVersion>
+    <targetVersion>0.17.1557</targetVersion>
 
     <description>Alerts the player whenever a wild animal enters the map. This is useful in extremely cold maps where growing is difficult and hunting is the primary source of food.
 
-Detours RimWorld.WildSpawner.SpawnRandomWildAnimalAt</description>
+Uses Harmony.
+
+Has a mod settings menu.</description>
 
 </ModMetaData>
