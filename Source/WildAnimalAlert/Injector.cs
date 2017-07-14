@@ -5,7 +5,7 @@ using Verse;
 
 namespace RD_WildAnimalAlert
 {
-    [StaticConstructorOnStartup]
+    //[StaticConstructorOnStartup]
     public class Injector
     {
         const BindingFlags UniversalBindingFlags = BindingFlags.Static | BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic;
