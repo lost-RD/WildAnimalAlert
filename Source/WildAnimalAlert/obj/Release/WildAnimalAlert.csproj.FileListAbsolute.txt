@@ -1,3 +1,7 @@
 C:\Games\RimWorld\A17\RimWorld1557Win\Mods\RD_WildAnimalAlert\Source\WildAnimalAlert\obj\Release\WildAnimalAlert.csprojResolveAssemblyReference.cache
 C:\Games\RimWorld\A17\RimWorld1557Win\Mods\RD_WildAnimalAlert\Assemblies\RD_WildAnimalAlert.dll
 C:\Games\RimWorld\A17\RimWorld1557Win\Mods\RD_WildAnimalAlert\Source\WildAnimalAlert\obj\Release\RD_WildAnimalAlert.dll
+C:\Users\Maniak\Documents\RimWorld Mods\Animal Alert\Source\WildAnimalAlert\obj\Release\WildAnimalAlert.csprojResolveAssemblyReference.cache
+C:\Users\Maniak\Documents\RimWorld Mods\Animal Alert\Source\WildAnimalAlert\obj\Release\WildAnimalAlert.csproj.CoreCompileInputs.cache
+C:\Users\Maniak\Documents\RimWorld Mods\Animal Alert\Source\WildAnimalAlert\obj\Release\RD_WildAnimalAlert.dll
+C:\Users\Maniak\Documents\RimWorld Mods\Animal Alert\Assemblies\RD_WildAnimalAlert.dll

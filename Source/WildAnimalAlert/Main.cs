@@ -51,6 +51,7 @@ namespace RD_WildAnimalAlert
 			// map is private so we access it with Traverse
 			var trv = Traverse.Create(__instance);
 			Map map = trv.Field("map").GetValue<Map>();
+            Pawn newThing = null;
 			if (map == null)
 			{
 				Log.Message("[RD_WildAnimalAlert] Map is null, something is wrong here");
@@ -83,7 +84,7 @@ namespace RD_WildAnimalAlert
 			{
 				// find a valid place to spawn the pawns
 				IntVec3 loc2 = CellFinder.RandomClosewalkCellNear(loc, map, radius);
-				Pawn newThing = PawnGenerator.GeneratePawn(pawnKindDef, null);
+				newThing = PawnGenerator.GeneratePawn(pawnKindDef, null);
 				GenSpawn.Spawn(newThing, loc2, map);
 				if (randomInRange == 1)
 				{
@@ -95,12 +96,13 @@ namespace RD_WildAnimalAlert
 				}
 			}
 			// check whether the alert should be played
-			if ((animals_before_current_spawns < Settings.AnimalCount) && (Settings.EnableMod))
+            //ternary operators are a thing of beauty.
+			if ((animals_before_current_spawns < Settings.AnimalCount) && (Settings.EnableMod) && ((Settings.PredatorOnly) ? newThing.RaceProps.predator : true))
 			{
-				Messages.Message(text, new TargetInfo(loc, map, false), MessageSound.Standard);
-			}
-			// return false to prevent the vanilla code from running (which would spawn another animal/group of animals)
-			return false;
+                Messages.Message(text, new TargetInfo(loc, map, false), MessageTypeDefOf.NeutralEvent);
+            }
+            // return false to prevent the vanilla code from running (which would spawn another animal/group of animals)
+            return false;
 		}
 	}
 }

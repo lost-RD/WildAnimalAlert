@@ -22,6 +22,8 @@ namespace RD_WildAnimalAlert
 			list.Begin(inRect);
 			list.Gap();
 			list.CheckboxLabeled("Enable mod", ref Settings.EnableMod, "Turn off to disable alerts when wild animals enter the map");
+            list.Gap();
+            list.CheckboxLabeled("Warning for predators only", ref Settings.PredatorOnly, "Only warn when the spawned animal is a predator");
 			list.Gap();
 			{
 				string label = "Threshold amount of animals below which to warn on arrival: ";

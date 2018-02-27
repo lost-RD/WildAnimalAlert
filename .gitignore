@@ -1,0 +1,15 @@
+
+Source/WildAnimalAlert/obj/Release/RD_WildAnimalAlert.dll
+*.csproj
+*.cache
+*.CopyComplete
+*.ide
+Source/WildAnimalAlert/.vs/WildAnimalAlert/v15/Server/sqlite3/db.lock
+Source/WildAnimalAlert/.vs/WildAnimalAlert/v15/.suo
+Source/WildAnimalAlert/obj/Release/RD_WildAnimalAlert.dll
+Source/WildAnimalAlert/obj/Release/WildAnimalAlert.csproj.FileListAbsolute.txt
+Source/WildAnimalAlert/obj/Release/WildAnimalAlert.csprojResolveAssemblyReference.cache
+.vs/ProjectSettings.json
+.vs/slnx.sqlite
+Source/WildAnimalAlert/obj/Release/WildAnimalAlert.csproj.FileListAbsolute.txt
+Source/WildAnimalAlert/obj/Release/RD_WildAnimalAlert.dll
