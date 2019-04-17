@@ -22,12 +22,12 @@ namespace RD_WildAnimalAlert
 		}
 	}
 
-	[HarmonyPatch(typeof(WildSpawner))]
+	[HarmonyPatch(typeof(WildAnimalSpawner))]
 	[HarmonyPatch("SpawnRandomWildAnimalAt")]
 	[HarmonyPatch(new Type[] { typeof(IntVec3)})]
 	class Patch
 	{
-		static float CurrentTotalAnimalNumber(WildSpawner __instance)
+		static float CurrentTotalAnimalNumber(WildAnimalSpawner __instance)
 		{
 			// map is a private field so we access it with Traverse
 			var trv = Traverse.Create(__instance);
@@ -37,7 +37,7 @@ namespace RD_WildAnimalAlert
 			List<Pawn> allPawnsSpawned = map.mapPawns.AllPawnsSpawned;
 			for (int i = 0; i < allPawnsSpawned.Count; i++)
 			{
-				if (allPawnsSpawned[i].kindDef.wildSpawn_spawnWild && allPawnsSpawned[i].Faction == null)
+				if (allPawnsSpawned[i].Faction == null)
 				{
 					num ++;
 				}
@@ -46,7 +46,7 @@ namespace RD_WildAnimalAlert
 			return num;
 		}
 
-		static bool Prefix(WildSpawner __instance, IntVec3 loc)
+		static bool Prefix(WildAnimalSpawner __instance, IntVec3 loc)
 		{
 			// map is private so we access it with Traverse
 			var trv = Traverse.Create(__instance);
@@ -59,16 +59,16 @@ namespace RD_WildAnimalAlert
 			// select a valid pawnkind to spawn
 			PawnKindDef pawnKindDef = (from a in map.Biome.AllWildAnimals
 									   where map.mapTemperature.SeasonAcceptableFor(a.race)
-									   select a).RandomElementByWeight((PawnKindDef def) => map.Biome.CommonalityOfAnimal(def) / def.wildSpawn_GroupSizeRange.Average);
+									   select a).RandomElementByWeight((PawnKindDef def) => map.Biome.CommonalityOfAnimal(def) / def.wildGroupSize.Average);
 			if (pawnKindDef == null)
 			{
 				Log.Error("No spawnable animals right now.");
 				return false;
 			}
 			// choose an amount of pawns to spawn
-			int randomInRange = pawnKindDef.wildSpawn_GroupSizeRange.RandomInRange;
+			int randomInRange = pawnKindDef.wildGroupSize.RandomInRange;
 			// and a radius within which to spawn them
-			int radius = Mathf.CeilToInt(Mathf.Sqrt((float)pawnKindDef.wildSpawn_GroupSizeRange.max));
+			int radius = Mathf.CeilToInt(Mathf.Sqrt((float)pawnKindDef.wildGroupSize.max));
 			string text = "DEBUG STRING: something went wrong, contact lost_RD with details";
 			// check the amount of animals on the map
 			float animals_before_current_spawns = CurrentTotalAnimalNumber(__instance);
@@ -97,7 +97,7 @@ namespace RD_WildAnimalAlert
 			// check whether the alert should be played
 			if ((animals_before_current_spawns < Settings.AnimalCount) && (Settings.EnableMod))
 			{
-				Messages.Message(text, new TargetInfo(loc, map, false), MessageSound.Standard);
+				Messages.Message(text, new TargetInfo(loc, map, false), MessageTypeDefOf.PositiveEvent);
 			}
 			// return false to prevent the vanilla code from running (which would spawn another animal/group of animals)
 			return false;

@@ -5,7 +5,10 @@ Alerts the player when wild animals wander onto the map. Configurable via the mo
 
 ## Changelog:
 
-### A17 Update:
+### Build 3_20190417 (targets 1.0.2231)
+* Release for 1.0! No changes.
+
+### A17 Update (1.1):
 * Added a mod settings menu including an enable/disable checkbox and a slider for the wild animal amount threshold.
 * Changed the way the mod works, moving away from detours. Now uses Harmony.
 * General updatery
