@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using Harmony;
+using HarmonyLib;
 using System.Reflection;
 using Verse;
 using RimWorld;
@@ -16,7 +16,7 @@ namespace RD_WildAnimalAlert
 		static Main()
 		{
 			Log.Message("[RD_WildAnimalAlert] Initialising...");
-			var harmony = HarmonyInstance.Create("org.rd.wildanimalalert");
+			var harmony = new Harmony("org.rd.wildanimalalert");
 			harmony.PatchAll(Assembly.GetExecutingAssembly());
 			Log.Message("[RD_WildAnimalAlert] Success! Probably.");
 		}
