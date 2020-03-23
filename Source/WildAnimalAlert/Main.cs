@@ -73,17 +73,17 @@ namespace RD_WildAnimalAlert
 			// check the amount of animals on the map
 			float animals_before_current_spawns = CurrentTotalAnimalNumber(__instance);
 
-			if (randomInRange > 1)
-			{
-				// text to use when spawning more than one animal
-				text = String.Concat(new string[] { "A group of ", randomInRange.ToString(), " wild ", pawnKindDef.label, " appeared!" });
-			}
-			
+			int males = 0;
+			int females = 0;
+			string malesStr = " males";
+			string femalesStr = " females.";
+
 			for (int i = 0; i < randomInRange; i++)
 			{
 				// find a valid place to spawn the pawns
 				IntVec3 loc2 = CellFinder.RandomClosewalkCellNear(loc, map, radius);
 				Pawn newThing = PawnGenerator.GeneratePawn(pawnKindDef, null);
+				if (newThing.gender == Gender.Female) { females++; } else if (newThing.gender == Gender.Male) { males++; }
 				GenSpawn.Spawn(newThing, loc2, map);
 				if (randomInRange == 1)
 				{
@@ -94,6 +94,14 @@ namespace RD_WildAnimalAlert
 					});
 				}
 			}
+			if (males == 1) { malesStr = " male"; }
+			if (females == 1) { femalesStr = " female."; }
+			if (randomInRange > 1)
+			{
+				// text to use when spawning more than one animal
+				text = String.Concat(new string[] { "A group of ", randomInRange.ToString(), " wild ", pawnKindDef.label, " appeared! ", males.ToString(), malesStr, " and ", females.ToString(), femalesStr });
+			}
+
 			// check whether the alert should be played
 			if ((animals_before_current_spawns < Settings.AnimalCount) && (Settings.EnableMod))
 			{
