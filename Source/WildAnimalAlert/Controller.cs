@@ -62,6 +62,8 @@ namespace RD_WildAnimalAlert
 					}
 				}
 			}
+			list.Gap();
+			list.CheckboxLabeled("Predators only mode", ref Settings.PredatorsOnly, "Turn on to only show alerts when predators enter the map, ignoring passive creatures");
 			list.End();
 		}
 

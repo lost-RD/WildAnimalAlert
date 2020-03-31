@@ -1,9 +1,12 @@
 # Wild Animal Alert
 RimWorld mod for Spartyon7
 
-Alerts the player when wild animals wander onto the map. Configurable via the mod settings menu, as of A17 you can choose how few animals must be alive on the map for an alert to be shown.
+Alerts the player when wild animals wander onto the map. Configurable via the mod settings menu with some options: choose how many animals must be on the map to disable alerts, and choose whether to alert for all animals or just predators.
 
 ## Changelog:
+
+### Build 5_20200331
+* Added predator toggle
 
 ### Build 4_20200322
 * Tested on 1.1.2579

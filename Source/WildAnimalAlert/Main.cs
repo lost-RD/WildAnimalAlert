@@ -105,7 +105,24 @@ namespace RD_WildAnimalAlert
 			// check whether the alert should be played
 			if ((animals_before_current_spawns < Settings.AnimalCount) && (Settings.EnableMod))
 			{
-				Messages.Message(text, new TargetInfo(loc, map, false), MessageTypeDefOf.PositiveEvent);
+				if (pawnKindDef.RaceProps.predator)
+				{
+					if (Settings.PredatorsOnly)
+					{
+						Messages.Message(text, new TargetInfo(loc, map, false), MessageTypeDefOf.NegativeEvent);
+					} else
+					{
+						Messages.Message(text, new TargetInfo(loc, map, false), MessageTypeDefOf.PositiveEvent);
+					}
+					
+				}
+				else
+				{
+					if (!Settings.PredatorsOnly)
+					{
+						Messages.Message(text, new TargetInfo(loc, map, false), MessageTypeDefOf.PositiveEvent);
+					}
+				}
 			}
 			// return false to prevent the vanilla code from running (which would spawn another animal/group of animals)
 			return false;
