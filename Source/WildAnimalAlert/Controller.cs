@@ -21,11 +21,11 @@ namespace RD_WildAnimalAlert
 			list.ColumnWidth = inRect.width;
 			list.Begin(inRect);
 			list.Gap();
-			list.CheckboxLabeled("Enable mod", ref Settings.EnableMod, "Turn off to disable alerts when wild animals enter the map");
+			list.CheckboxLabeled("WAA_Settings_EnableMod".Translate(), ref Settings.EnableMod, "WAA_Settings_EnableModMouseOver".Translate());
 			list.Gap();
 			{
-				string label = "Threshold amount of animals below which to warn on arrival: ";
-				string description = "Defaults to 1 so you'll only be notified if there are no wild animals left alive on the map when a new one arrives.";
+				string label = "WAA_Settings_ThresholdLabel".Translate();
+				string description = "WAA_Settings_ThresholdDesc".Translate();
 				int valueMin = 0;
 				int valueMax = 100;
 
@@ -63,13 +63,13 @@ namespace RD_WildAnimalAlert
 				}
 			}
 			list.Gap();
-			list.CheckboxLabeled("Predators only mode", ref Settings.PredatorsOnly, "Turn on to only show alerts when predators enter the map, ignoring passive creatures");
+			list.CheckboxLabeled("WAA_Settings_PredatorsOnly".Translate(), ref Settings.PredatorsOnly, "WAA_Settings_PredatorsOnlyMouseOver".Translate());
 			list.End();
 		}
 
 		public override string SettingsCategory()
 		{
-			return "Wild Animal Alert";
+			return "WAA_Settings".Translate();
 		}
 	}
 }

@@ -75,8 +75,8 @@ namespace RD_WildAnimalAlert
 
 			int males = 0;
 			int females = 0;
-			string malesStr = " males";
-			string femalesStr = " females.";
+			string malesStr = "WAA_Males".Translate();
+			string femalesStr = "WAA_Females".Translate();
 
 			for (int i = 0; i < randomInRange; i++)
 			{
@@ -88,18 +88,20 @@ namespace RD_WildAnimalAlert
 				if (randomInRange == 1)
 				{
 					// text to use when spawning only one animal
-					text = String.Concat(new string[] { "A wild ", newThing.Label, " appeared! ",
-					newThing.gender.ToString(), " ", newThing.Label, ", ",
-					newThing.ageTracker.AgeBiologicalYears.ToString(), " years old. ",
-					});
+					text = "WAA_Message_SpawnSingle".Translate(newThing.Label, newThing.GetGenderLabel(), newThing.ageTracker.AgeBiologicalYears);
+					//text = String.Concat(new string[] { "A wild ", newThing.Label, " appeared! ",
+					//newThing.gender.ToString(), " ", newThing.Label, ", ",
+					//newThing.ageTracker.AgeBiologicalYears.ToString(), " years old. ",
+					//});
 				}
 			}
-			if (males == 1) { malesStr = " male"; }
-			if (females == 1) { femalesStr = " female."; }
+			if (males == 1) { malesStr = "WAA_Male".Translate(); }
+			if (females == 1) { femalesStr = "WAA_Female".Translate(); }
 			if (randomInRange > 1)
 			{
 				// text to use when spawning more than one animal
-				text = String.Concat(new string[] { "A group of ", randomInRange.ToString(), " wild ", pawnKindDef.label, " appeared! ", males.ToString(), malesStr, " and ", females.ToString(), femalesStr });
+				text = "WAA_Message_SpawnGroup".Translate(randomInRange, pawnKindDef.label, males, malesStr.Translate(), females, femalesStr.Translate());
+				//text = String.Concat(new string[] { "A group of ", randomInRange.ToString(), " wild ", pawnKindDef.label, " appeared! ", males.ToString(), malesStr, " and ", females.ToString(), femalesStr });
 			}
 
 			// check whether the alert should be played
