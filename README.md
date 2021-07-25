@@ -5,6 +5,9 @@ Alerts the player when wild animals wander onto the map. Configurable via the mo
 
 ## Changelog:
 
+### Build 7_20210725
+* 1.3 update
+
 ### Build 6_20201109
 * 1.2 update
 * Added translation support
