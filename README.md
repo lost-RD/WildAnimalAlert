@@ -1,5 +1,5 @@
 # Wild Animal Alert
-RimWorld mod for Spartyon7
+RimWorld mod originally made for Spartyon7
 
 Alerts the player when wild animals wander onto the map. Configurable via the mod settings menu with some options: choose how many animals must be on the map to disable alerts, and choose whether to alert for all animals or just predators.
 
