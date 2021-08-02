@@ -100,7 +100,8 @@ namespace RD_WildAnimalAlert
 			if (randomInRange > 1)
 			{
 				// text to use when spawning more than one animal
-				text = "WAA_Message_SpawnGroup".Translate(randomInRange, pawnKindDef.label, males, malesStr.Translate(), females, femalesStr.Translate());
+				//text = "WAA_Message_SpawnGroup".Translate(randomInRange, pawnKindDef.label, males, malesStr.Translate(), females, femalesStr.Translate()); I think this line is broken, see next line
+				text = "WAA_Message_SpawnGroup".Translate(randomInRange, pawnKindDef.label, males, malesStr, females, femalesStr);
 				//text = String.Concat(new string[] { "A group of ", randomInRange.ToString(), " wild ", pawnKindDef.label, " appeared! ", males.ToString(), malesStr, " and ", females.ToString(), femalesStr });
 			}
 
