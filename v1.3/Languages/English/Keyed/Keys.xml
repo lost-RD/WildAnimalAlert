@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<LanguageData>
+
+	<WAA_Settings>Wild Animal Alert</WAA_Settings>
+	<WAA_Settings_EnableMod>Enable mod</WAA_Settings_EnableMod>
+	<WAA_Settings_EnableModMouseOver>Turn off to disable alerts when wild animals enter the map</WAA_Settings_EnableModMouseOver>
+	<WAA_Settings_ThresholdLabel>Threshold amount of animals below which to warn on arrival: </WAA_Settings_ThresholdLabel>
+	<WAA_Settings_ThresholdDesc>Defaults to 1 so you'll only be notified if there are no wild animals left alive on the map when a new one arrives.</WAA_Settings_ThresholdDesc>
+	<WAA_Settings_PredatorsOnly>Predators only mode</WAA_Settings_PredatorsOnly>
+	<WAA_Settings_PredatorsOnlyMouseOver>Turn on to only show alerts when predators enter the map, ignoring passive creatures</WAA_Settings_PredatorsOnlyMouseOver>
+
+	<WAA_Male>male</WAA_Male>
+	<WAA_Female>female</WAA_Female>
+	<WAA_Males>males</WAA_Males>
+	<WAA_Females>females</WAA_Females>
+	
+	<WAA_Message_DebugString>DEBUG STRING: something went wrong, contact lost_RD with details</WAA_Message_DebugString>
+	<WAA_Message_SpawnSingle>A wild {0} appeared! {1} {0}, {2} years old.</WAA_Message_SpawnSingle>
+	<WAA_Message_SpawnGroup>A group of {0} wild {1}s appeared! {2} {3} and {4} {5}</WAA_Message_SpawnGroup>
+
+</LanguageData>
