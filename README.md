@@ -5,6 +5,12 @@ Alerts the player when wild animals wander onto the map. Configurable via the mo
 
 ## Changelog:
 
+### Build 9_20221025
+* 1.4 update
+
+### Build 8_20220607
+* Fixed a bug introduced in 1.3 where animals were not spawned in on creating a new map
+
 ### Build 7_20210725
 * 1.3 update
 

@@ -29,6 +29,7 @@ namespace RD_WildAnimalAlert
 	{
 		static float CurrentTotalAnimalNumber(WildAnimalSpawner __instance)
 		{
+			if (Settings.DebugMode) { Log.Message($"[RD_WildAnimalAlert] CurrentTotalAnimalNumber begin"); }
 			// map is a private field so we access it with Traverse
 			var trv = Traverse.Create(__instance);
 			Map map = trv.Field("map").GetValue<Map>();
@@ -43,11 +44,13 @@ namespace RD_WildAnimalAlert
 				}
 			}
 			// return the amount of animals on the map
+			if (Settings.DebugMode) { Log.Message($"[RD_WildAnimalAlert] CurrentTotalAnimalNumber returning {num}"); }
 			return num;
 		}
 
-		static bool Prefix(WildAnimalSpawner __instance, IntVec3 loc)
+		static bool Prefix(WildAnimalSpawner __instance, IntVec3 loc, ref bool __result)
 		{
+			if (Settings.DebugMode) { Log.Message($"[RD_WildAnimalAlert] Prefix begin"); }
 			// map is private so we access it with Traverse
 			var trv = Traverse.Create(__instance);
 			Map map = trv.Field("map").GetValue<Map>();
@@ -62,14 +65,15 @@ namespace RD_WildAnimalAlert
 									   select a).RandomElementByWeight((PawnKindDef def) => map.Biome.CommonalityOfAnimal(def) / def.wildGroupSize.Average);
 			if (pawnKindDef == null)
 			{
-				Log.Error("No spawnable animals right now.");
+				Log.Error("[RD_WildAnimalAlert] No spawnable animals right now.");
+				__result = false;
 				return false;
 			}
 			// choose an amount of pawns to spawn
 			int randomInRange = pawnKindDef.wildGroupSize.RandomInRange;
 			// and a radius within which to spawn them
 			int radius = Mathf.CeilToInt(Mathf.Sqrt((float)pawnKindDef.wildGroupSize.max));
-			string text = "DEBUG STRING: something went wrong, contact lost_RD with details";
+			string text = "WAA_Message_DebugString".Translate();
 			// check the amount of animals on the map
 			float animals_before_current_spawns = CurrentTotalAnimalNumber(__instance);
 
@@ -106,18 +110,11 @@ namespace RD_WildAnimalAlert
 			}
 
 			// check whether the alert should be played
-			if ((animals_before_current_spawns < Settings.AnimalCount) && (Settings.EnableMod))
+			if (Settings.EnableMod && (animals_before_current_spawns < Settings.AnimalCount))
 			{
 				if (pawnKindDef.RaceProps.predator)
 				{
-					if (Settings.PredatorsOnly)
-					{
-						Messages.Message(text, new TargetInfo(loc, map, false), MessageTypeDefOf.NegativeEvent);
-					} else
-					{
-						Messages.Message(text, new TargetInfo(loc, map, false), MessageTypeDefOf.PositiveEvent);
-					}
-					
+					Messages.Message(text, new TargetInfo(loc, map, false), MessageTypeDefOf.NegativeEvent);
 				}
 				else
 				{
@@ -127,6 +124,8 @@ namespace RD_WildAnimalAlert
 					}
 				}
 			}
+			if (Settings.DebugMode) { Log.Message($"[RD_WildAnimalAlert] Prefix __result true"); }
+			__result = true;
 			// return false to prevent the vanilla code from running (which would spawn another animal/group of animals)
 			return false;
 		}

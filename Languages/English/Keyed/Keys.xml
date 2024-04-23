@@ -8,6 +8,8 @@
 	<WAA_Settings_ThresholdDesc>Defaults to 1 so you'll only be notified if there are no wild animals left alive on the map when a new one arrives.</WAA_Settings_ThresholdDesc>
 	<WAA_Settings_PredatorsOnly>Predators only mode</WAA_Settings_PredatorsOnly>
 	<WAA_Settings_PredatorsOnlyMouseOver>Turn on to only show alerts when predators enter the map, ignoring passive creatures</WAA_Settings_PredatorsOnlyMouseOver>
+	<WAA_Settings_DebugMode>Debug mode</WAA_Settings_DebugMode>
+	<WAA_Settings_DebugModeMouseOver>Prints messages to the debug console for debugging</WAA_Settings_DebugModeMouseOver>
 
 	<WAA_Male>male</WAA_Male>
 	<WAA_Female>female</WAA_Female>

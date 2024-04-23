@@ -7,6 +7,7 @@ namespace RD_WildAnimalAlert
 		internal static bool EnableMod = true;
 		internal static int AnimalCount = 5;
 		internal static bool PredatorsOnly = false;
+		internal static bool DebugMode = false;
 
 		public override void ExposeData()
 		{
@@ -14,6 +15,7 @@ namespace RD_WildAnimalAlert
 			Scribe_Values.Look(ref EnableMod, "EnableMod", true);
 			Scribe_Values.Look(ref AnimalCount, "AnimalCount", 1);
 			Scribe_Values.Look(ref PredatorsOnly, "PredatorsOnly", false);
+			Scribe_Values.Look(ref DebugMode, "DebugMode", false);
 		}
 	}
 }

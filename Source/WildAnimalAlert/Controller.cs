@@ -64,6 +64,8 @@ namespace RD_WildAnimalAlert
 			}
 			list.Gap();
 			list.CheckboxLabeled("WAA_Settings_PredatorsOnly".Translate(), ref Settings.PredatorsOnly, "WAA_Settings_PredatorsOnlyMouseOver".Translate());
+			list.Gap();
+			list.CheckboxLabeled("WAA_Settings_DebugMode".Translate(), ref Settings.DebugMode, "WAA_Settings_DebugModeMouseOver".Translate());
 			list.End();
 		}
 

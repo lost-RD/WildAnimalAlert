@@ -1,16 +1,19 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 14
-VisualStudioVersion = 14.0.25420.1
+# Visual Studio Version 17
+VisualStudioVersion = 17.3.32901.215
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WildAnimalAlert", "WildAnimalAlert.csproj", "{67967A1F-BCE9-4606-B027-59EB8BE292BD}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		1.4|Any CPU = 1.4|Any CPU
 		Debug|Any CPU = Debug|Any CPU
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{67967A1F-BCE9-4606-B027-59EB8BE292BD}.1.4|Any CPU.ActiveCfg = 1.4|Any CPU
+		{67967A1F-BCE9-4606-B027-59EB8BE292BD}.1.4|Any CPU.Build.0 = 1.4|Any CPU
 		{67967A1F-BCE9-4606-B027-59EB8BE292BD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{67967A1F-BCE9-4606-B027-59EB8BE292BD}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{67967A1F-BCE9-4606-B027-59EB8BE292BD}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -18,5 +21,8 @@ Global
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {F1D24E83-926E-4A40-B2A8-E651FF6F1E72}
 	EndGlobalSection
 EndGlobal
