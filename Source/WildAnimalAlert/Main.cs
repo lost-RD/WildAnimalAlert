@@ -35,7 +35,7 @@ namespace RD_WildAnimalAlert
 			Map map = trv.Field("map").GetValue<Map>();
 			// count all animals on the map
 			float num = 0f;
-			List<Pawn> allPawnsSpawned = map.mapPawns.AllPawnsSpawned;
+			List<Pawn> allPawnsSpawned = (List<Pawn>)map.mapPawns.AllPawnsSpawned;
 			for (int i = 0; i < allPawnsSpawned.Count; i++)
 			{
 				if (allPawnsSpawned[i].Faction == null)
@@ -54,18 +54,29 @@ namespace RD_WildAnimalAlert
 			// map is private so we access it with Traverse
 			var trv = Traverse.Create(__instance);
 			Map map = trv.Field("map").GetValue<Map>();
+
 			if (map == null)
 			{
 				Log.Message("[RD_WildAnimalAlert] Map is null, something is wrong here");
 				return false;
 			}
 			// select a valid pawnkind to spawn
-			PawnKindDef pawnKindDef = (from a in map.Biome.AllWildAnimals
-									   where map.mapTemperature.SeasonAcceptableFor(a.race)
-									   select a).RandomElementByWeight((PawnKindDef def) => map.Biome.CommonalityOfAnimal(def) / def.wildGroupSize.Average);
-			if (pawnKindDef == null)
+			PawnKindDef pawnKindDef;
+			if (
+				!(
+					from a in map.Biome.AllWildAnimals
+					where map.mapTemperature.SeasonAcceptableFor(a.race, 0f)
+					select a
+				).
+				TryRandomElementByWeight(
+					(PawnKindDef def) => trv.Method("CommonalityOfAnimalNow", def).GetValue<float>(), out pawnKindDef
+				)
+			)
 			{
-				Log.Error("[RD_WildAnimalAlert] No spawnable animals right now.");
+				if (Settings.DebugMode)
+				{
+					Log.Message("[RD_WildAnimalAlert] No spawnable animals right now.");
+				}
 				__result = false;
 				return false;
 			}
@@ -85,10 +96,10 @@ namespace RD_WildAnimalAlert
 			for (int i = 0; i < randomInRange; i++)
 			{
 				// find a valid place to spawn the pawns
-				IntVec3 loc2 = CellFinder.RandomClosewalkCellNear(loc, map, radius);
+				IntVec3 loc2 = CellFinder.RandomClosewalkCellNear(loc, map, radius, null);
 				Pawn newThing = PawnGenerator.GeneratePawn(pawnKindDef, null);
 				if (newThing.gender == Gender.Female) { females++; } else if (newThing.gender == Gender.Male) { males++; }
-				GenSpawn.Spawn(newThing, loc2, map);
+				GenSpawn.Spawn(newThing, loc2, map, WipeMode.Vanish);
 				if (randomInRange == 1)
 				{
 					// text to use when spawning only one animal
