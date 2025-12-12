@@ -16,6 +16,7 @@
 	
 	<WAA_Message_DebugString>DEBUG STRING: something went wrong, contact lost_RD with details</WAA_Message_DebugString>
 	<WAA_Message_SpawnSingle>В поле зрения появилось дикое животное вида "{0}"! ({1}, возраст ^Number( {2} | '# год' | '# года' | '# лет')^)</WAA_Message_SpawnSingle>
-	<WAA_Message_SpawnGroup>В поле зрения появилась группа из {0} диких животных вида "{1}"! Среди них ^Number( {2} | '# самец' | '# самца' | '# самцов')^ и ^Number( {4} | '# самка' | '# самки' | '# самок')^</WAA_Message_SpawnGroup>
+	<WAA_Message_SpawnGroup_v1>В поле зрения появилась группа из {0} диких животных вида "{1}"! Среди них ^Number( {2} | '# самец' | '# самца' | '# самцов')^ и ^Number( {4} | '# самка' | '# самки' | '# самок')^</WAA_Message_SpawnGroup_v1>
+	<WAA_Message_SpawnGroup_v2>В поле зрения появилась группа из {0} диких животных вида "{1}"!</WAA_Message_SpawnGroup_v2>
 
 </LanguageData>

@@ -1,144 +1,258 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using HarmonyLib;
 using System.Reflection;
-using Verse;
+using System.Reflection.Emit;
+using System.Security.Cryptography;
+using HarmonyLib;
 using RimWorld;
 using UnityEngine;
+using Verse;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace RD_WildAnimalAlert
 {
 	[StaticConstructorOnStartup]
-	class Main
+	static class Main
 	{
 		static Main()
 		{
-			Log.Message("[RD_WildAnimalAlert] Initialising...");
 			var harmony = new Harmony("org.rd.wildanimalalert");
-			harmony.PatchAll(Assembly.GetExecutingAssembly());
-			Log.Message("[RD_WildAnimalAlert] Success! Probably.");
+			harmony.PatchAll();
+			Log.Message("[RD_WildAnimalAlert] Patched with transpiler.");
 		}
 	}
 
-	[HarmonyPatch(typeof(WildAnimalSpawner))]
-	[HarmonyPatch("SpawnRandomWildAnimalAt")]
-	[HarmonyPatch(new Type[] { typeof(IntVec3)})]
-	class Patch
+	[HarmonyPatch(typeof(WildAnimalSpawner), nameof(WildAnimalSpawner.SpawnRandomWildAnimalAt))]
+	public static class WildAnimalSpawner_SpawnRandomWildAnimalAt_Transpiler
 	{
-		static float CurrentTotalAnimalNumber(WildAnimalSpawner __instance)
+		// Helper: Check if opcode is any variant of stloc
+		static bool IsStloc(OpCode opcode)
 		{
-			if (Settings.DebugMode) { Log.Message($"[RD_WildAnimalAlert] CurrentTotalAnimalNumber begin"); }
-			// map is a private field so we access it with Traverse
-			var trv = Traverse.Create(__instance);
-			Map map = trv.Field("map").GetValue<Map>();
-			// count all animals on the map
+			return opcode == OpCodes.Stloc_0 || opcode == OpCodes.Stloc_1 || 
+			       opcode == OpCodes.Stloc_2 || opcode == OpCodes.Stloc_3 || 
+			       opcode == OpCodes.Stloc_S || opcode == OpCodes.Stloc;
+		}
+
+		// Helper: Check if opcode is Call or Callvirt
+		static bool IsCallOrCallvirt(OpCode opcode)
+		{
+			return opcode == OpCodes.Call || opcode == OpCodes.Callvirt;
+		}
+
+		static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions, ILGenerator il, MethodBase original)
+		{
+			var codes = instructions.ToList();
+
+			var notifyMany = AccessTools.Method(typeof(WildAnimalSpawner_SpawnRandomWildAnimalAt_Transpiler), nameof(NotifySpawnedAnimals));
+			var notifyOne = AccessTools.Method(typeof(WildAnimalSpawner_SpawnRandomWildAnimalAt_Transpiler), nameof(NotifySpawnedAnimal));
+			var mapField = AccessTools.Field(typeof(WildAnimalSpawner), "map");
+
+			if (Settings.DebugMode)
+				Log.Message($"[RD_WildAnimalAlert] Transpiler: Starting transpile with {codes.Count} instructions");
+
+			// ===== Hook 1: After randomInRange is set =====
+			int randIndex = codes.FindIndex(ci =>
+				IsStloc(ci.opcode) &&
+				codes[Math.Max(0, codes.IndexOf(ci) - 1)] != null &&
+				IsCallOrCallvirt(codes[Math.Max(0, codes.IndexOf(ci) - 1)].opcode) &&
+				codes[Math.Max(0, codes.IndexOf(ci) - 1)].operand is MethodInfo mi &&
+				mi.Name == "get_RandomInRange");
+
+			int randomInRangeIndex = -1;
+
+			if (randIndex != -1)
+			{
+				// Get the local variable index for randomInRange
+				randomInRangeIndex = GetLocalIndex(codes[randIndex]);
+				
+				if (Settings.DebugMode)
+					Log.Message($"[RD_WildAnimalAlert] Transpiler: Found randomInRange assignment at index {randIndex}, local index = {randomInRangeIndex}");
+
+				var afterRandLabel = il.DefineLabel();
+				codes[randIndex + 1].labels.Add(afterRandLabel);
+
+				if (Settings.DebugMode)
+					Log.Message($"[RD_WildAnimalAlert] Transpiler: Using method arguments - arg1=loc, arg3=animalKind");
+
+				// Insert NotifySpawnedAnimals if > 1
+				// Method signature: SpawnRandomWildAnimalAt(IntVec3 loc, bool canFlyIn, PawnKindDef animalKind)
+				// Args: 0=this, 1=loc, 2=canFlyIn, 3=animalKind
+				codes.InsertRange(randIndex + 1, new[]
+				{
+					CreateLdloc(randomInRangeIndex, codes),
+					new CodeInstruction(OpCodes.Ldc_I4_1),
+					new CodeInstruction(OpCodes.Ble_S, afterRandLabel),
+
+					CreateLdloc(randomInRangeIndex, codes),
+					new CodeInstruction(OpCodes.Ldarg_3),  // animalKind parameter
+					new CodeInstruction(OpCodes.Ldarg_1),  // loc parameter
+					new CodeInstruction(OpCodes.Ldarg_0),  // this
+					new CodeInstruction(OpCodes.Ldfld, mapField),
+					new CodeInstruction(OpCodes.Call, notifyMany)
+				});
+
+				if (Settings.DebugMode)
+					Log.Message($"[RD_WildAnimalAlert] Transpiler: Inserted Hook 1 (NotifySpawnedAnimals for groups)");
+			}
+			else
+			{
+				Log.Error("[RD_WildAnimalAlert] Transpiler: Could not find randomInRange assignment!");
+			}
+
+			// ===== Hook 2: After pawn is generated =====
+			int pawnIndex = codes.FindIndex(ci =>
+				IsStloc(ci.opcode) &&
+				codes[Math.Max(0, codes.IndexOf(ci) - 1)] != null &&
+				IsCallOrCallvirt(codes[Math.Max(0, codes.IndexOf(ci) - 1)].opcode) &&
+				codes[Math.Max(0, codes.IndexOf(ci) - 1)].operand is MethodInfo mi &&
+				mi.Name.Contains("GeneratePawn"));
+
+			if (pawnIndex != -1 && randomInRangeIndex >= 0)
+			{
+				if (Settings.DebugMode)
+					Log.Message($"[RD_WildAnimalAlert] Transpiler: Found GeneratePawn at index {pawnIndex}");
+
+				var afterPawnLabel = il.DefineLabel();
+				codes[pawnIndex + 1].labels.Add(afterPawnLabel);
+
+				var pawnLocal = codes[pawnIndex].operand;
+				var locLocal = FindLocalIndexByType<IntVec3>(codes);
+
+				if (Settings.DebugMode)
+					Log.Message($"[RD_WildAnimalAlert] Transpiler: pawnLocal = {pawnLocal}, using randomInRangeIndex = {randomInRangeIndex}");
+
+				// Insert NotifySpawnedAnimal if == 1
+				codes.InsertRange(pawnIndex + 1, new[]
+				{
+					CreateLdloc(randomInRangeIndex, codes),
+					new CodeInstruction(OpCodes.Ldc_I4_1),
+					new CodeInstruction(OpCodes.Bne_Un_S, afterPawnLabel),
+
+					new CodeInstruction(OpCodes.Ldloc, pawnLocal),
+					new CodeInstruction(OpCodes.Ldloc, locLocal),
+					new CodeInstruction(OpCodes.Ldarg_0),
+					new CodeInstruction(OpCodes.Ldfld, mapField),
+					CreateLdloc(randomInRangeIndex, codes),
+					new CodeInstruction(OpCodes.Call, notifyOne)
+				});
+
+				if (Settings.DebugMode)
+					Log.Message($"[RD_WildAnimalAlert] Transpiler: Inserted Hook 2 (NotifySpawnedAnimal for singles)");
+			}
+			else if (pawnIndex == -1)
+			{
+				Log.Error("[RD_WildAnimalAlert] Transpiler: Could not find GeneratePawn call!");
+			}
+
+			if (Settings.DebugMode)
+				Log.Message($"[RD_WildAnimalAlert] Transpiler: Completed with {codes.Count} instructions");
+
+			return codes;
+		}
+
+		// Helper: Get the local variable index from any stloc/ldloc instruction
+		static int GetLocalIndex(CodeInstruction ci)
+		{
+			if (ci.opcode == OpCodes.Stloc_0 || ci.opcode == OpCodes.Ldloc_0) return 0;
+			if (ci.opcode == OpCodes.Stloc_1 || ci.opcode == OpCodes.Ldloc_1) return 1;
+			if (ci.opcode == OpCodes.Stloc_2 || ci.opcode == OpCodes.Ldloc_2) return 2;
+			if (ci.opcode == OpCodes.Stloc_3 || ci.opcode == OpCodes.Ldloc_3) return 3;
+			if (ci.operand is LocalBuilder lb) return lb.LocalIndex;
+			return -1;
+		}
+
+		// Helper: Create a CodeInstruction to load a local variable by index
+		static CodeInstruction CreateLdloc(int index, List<CodeInstruction> codes)
+		{
+			// For indices 0-3, use short-form opcodes with no operand
+			switch (index)
+			{
+				case 0: return new CodeInstruction(OpCodes.Ldloc_0);
+				case 1: return new CodeInstruction(OpCodes.Ldloc_1);
+				case 2: return new CodeInstruction(OpCodes.Ldloc_2);
+				case 3: return new CodeInstruction(OpCodes.Ldloc_3);
+			}
+
+			// For index > 3, try to find a LocalBuilder with that index
+			foreach (var code in codes)
+			{
+				if (code.operand is LocalBuilder lb && lb.LocalIndex == index)
+					return new CodeInstruction(OpCodes.Ldloc, lb);
+			}
+
+			// Fallback: use Ldloc_S with byte operand
+			return new CodeInstruction(OpCodes.Ldloc_S, (byte)index);
+		}
+
+		// Helper: Find a local variable index by type
+		static object FindLocalIndexByType<T>(List<CodeInstruction> codes)
+		{
+			var type = typeof(T);
+			foreach (var ci in codes)
+				if (ci.operand is LocalBuilder lb && lb.LocalType == type)
+					return lb;
+			throw new InvalidOperationException($"Local of type {type} not found.");
+		}
+
+		static float CurrentTotalAnimalNumber(Map map)
+		{
+			if (Settings.DebugMode)
+				Log.Message($"[RD_WildAnimalAlert] CurrentTotalAnimalNumber begin");
+
 			float num = 0f;
 			List<Pawn> allPawnsSpawned = (List<Pawn>)map.mapPawns.AllPawnsSpawned;
 			for (int i = 0; i < allPawnsSpawned.Count; i++)
 			{
 				if (allPawnsSpawned[i].Faction == null)
-				{
-					num ++;
-				}
+					num++;
 			}
-			// return the amount of animals on the map
-			if (Settings.DebugMode) { Log.Message($"[RD_WildAnimalAlert] CurrentTotalAnimalNumber returning {num}"); }
+
+			if (Settings.DebugMode)
+				Log.Message($"[RD_WildAnimalAlert] CurrentTotalAnimalNumber returning {num}");
+
 			return num;
 		}
 
-		static bool Prefix(WildAnimalSpawner __instance, IntVec3 loc, ref bool __result)
+		// Your callbacks
+		public static void NotifySpawnedAnimals(int count, PawnKindDef kind, IntVec3 loc, Map map)
 		{
-			if (Settings.DebugMode) { Log.Message($"[RD_WildAnimalAlert] Prefix begin"); }
-			// map is private so we access it with Traverse
-			var trv = Traverse.Create(__instance);
-			Map map = trv.Field("map").GetValue<Map>();
-
-			if (map == null)
-			{
-				Log.Message("[RD_WildAnimalAlert] Map is null, something is wrong here");
-				return false;
-			}
-			// select a valid pawnkind to spawn
-			PawnKindDef pawnKindDef;
-			if (
-				!(
-					from a in map.Biome.AllWildAnimals
-					where map.mapTemperature.SeasonAcceptableFor(a.race, 0f)
-					select a
-				).
-				TryRandomElementByWeight(
-					(PawnKindDef def) => trv.Method("CommonalityOfAnimalNow", def).GetValue<float>(), out pawnKindDef
-				)
-			)
-			{
-				if (Settings.DebugMode)
-				{
-					Log.Message("[RD_WildAnimalAlert] No spawnable animals right now.");
-				}
-				__result = false;
-				return false;
-			}
-			// choose an amount of pawns to spawn
-			int randomInRange = pawnKindDef.wildGroupSize.RandomInRange;
-			// and a radius within which to spawn them
-			int radius = Mathf.CeilToInt(Mathf.Sqrt((float)pawnKindDef.wildGroupSize.max));
 			string text = "WAA_Message_DebugString".Translate();
-			// check the amount of animals on the map
-			float animals_before_current_spawns = CurrentTotalAnimalNumber(__instance);
 
-			int males = 0;
-			int females = 0;
-			string malesStr = "WAA_Males".Translate();
-			string femalesStr = "WAA_Females".Translate();
+			if (Settings.DebugMode)
+				Log.Message($"[RD_WildAnimalAlert] NotifySpawnedAnimals: {count}x {kind.defName} at {loc} on {map}");
 
-			for (int i = 0; i < randomInRange; i++)
-			{
-				// find a valid place to spawn the pawns
-				IntVec3 loc2 = CellFinder.RandomClosewalkCellNear(loc, map, radius, null);
-				Pawn newThing = PawnGenerator.GeneratePawn(pawnKindDef, null);
-				if (newThing.gender == Gender.Female) { females++; } else if (newThing.gender == Gender.Male) { males++; }
-				GenSpawn.Spawn(newThing, loc2, map, WipeMode.Vanish);
-				if (randomInRange == 1)
-				{
-					// text to use when spawning only one animal
-					text = "WAA_Message_SpawnSingle".Translate(newThing.Label, newThing.GetGenderLabel(), newThing.ageTracker.AgeBiologicalYears);
-					//text = String.Concat(new string[] { "A wild ", newThing.Label, " appeared! ",
-					//newThing.gender.ToString(), " ", newThing.Label, ", ",
-					//newThing.ageTracker.AgeBiologicalYears.ToString(), " years old. ",
-					//});
-				}
-			}
-			if (males == 1) { malesStr = "WAA_Male".Translate(); }
-			if (females == 1) { femalesStr = "WAA_Female".Translate(); }
-			if (randomInRange > 1)
-			{
-				// text to use when spawning more than one animal
-				//text = "WAA_Message_SpawnGroup".Translate(randomInRange, pawnKindDef.label, males, malesStr.Translate(), females, femalesStr.Translate()); I think this line is broken, see next line
-				text = "WAA_Message_SpawnGroup".Translate(randomInRange, pawnKindDef.label, males, malesStr, females, femalesStr);
-				//text = String.Concat(new string[] { "A group of ", randomInRange.ToString(), " wild ", pawnKindDef.label, " appeared! ", males.ToString(), malesStr, " and ", females.ToString(), femalesStr });
+			if (!Settings.EnableMod || CurrentTotalAnimalNumber(map) >= Settings.AnimalCount) {
+				return; // bail out early
 			}
 
-			// check whether the alert should be played
-			if (Settings.EnableMod && (animals_before_current_spawns < Settings.AnimalCount))
+			text = "WAA_Message_SpawnGroup_v2".Translate(count, kind.label);
+
+			if (kind.RaceProps.predator)
+				Messages.Message(text, new TargetInfo(loc, map, false), MessageTypeDefOf.NegativeEvent);
+			else if (!Settings.PredatorsOnly)
+				Messages.Message(text, new TargetInfo(loc, map, false), MessageTypeDefOf.PositiveEvent);
+
+		}
+
+		public static void NotifySpawnedAnimal(Pawn pawn, IntVec3 loc, Map map, int count)
+		{
+			string text = "WAA_Message_DebugString".Translate();
+
+			if (Settings.DebugMode)
+				Log.Message($"[RD_WildAnimalAlert] NotifySpawnedAnimal: {pawn} at {loc} on {map}, count={count}");
+
+			if (!Settings.EnableMod || CurrentTotalAnimalNumber(map) >= Settings.AnimalCount)
 			{
-				if (pawnKindDef.RaceProps.predator)
-				{
-					Messages.Message(text, new TargetInfo(loc, map, false), MessageTypeDefOf.NegativeEvent);
-				}
-				else
-				{
-					if (!Settings.PredatorsOnly)
-					{
-						Messages.Message(text, new TargetInfo(loc, map, false), MessageTypeDefOf.PositiveEvent);
-					}
-				}
+				return; // bail out early
 			}
-			if (Settings.DebugMode) { Log.Message($"[RD_WildAnimalAlert] Prefix __result true"); }
-			__result = true;
-			// return false to prevent the vanilla code from running (which would spawn another animal/group of animals)
-			return false;
+
+			text = "WAA_Message_SpawnSingle".Translate(pawn.Label, pawn.GetGenderLabel(), pawn.ageTracker.AgeBiologicalYears);
+
+			if (pawn.kindDef.RaceProps.predator)
+				Messages.Message(text, new TargetInfo(pawn), MessageTypeDefOf.NegativeEvent);
+			else if (!Settings.PredatorsOnly)
+				Messages.Message(text, new TargetInfo(pawn), MessageTypeDefOf.PositiveEvent);
 		}
 	}
 }

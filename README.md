@@ -11,7 +11,7 @@ My modding directory structure is as follows:
 .
 ├── Libraries
 │   ├── ...
-│   └── 1.5
+│   └── 1.6
 |       ├── 0Harmony.dll
 │       ├── Assembly-CSharp.dll
 |       └── ...

@@ -18,6 +18,7 @@
 	
 	<WAA_Message_DebugString>DEBUG STRING: something went wrong, contact lost_RD with details</WAA_Message_DebugString>
 	<WAA_Message_SpawnSingle>A wild {0} appeared! {1} {0}, {2} years old.</WAA_Message_SpawnSingle>
-	<WAA_Message_SpawnGroup>A group of {0} wild {1}s appeared! {2} {3} and {4} {5}</WAA_Message_SpawnGroup>
+	<WAA_Message_SpawnGroup_v1>A group of {0} wild {1}s appeared! {2} {3} and {4} {5}</WAA_Message_SpawnGroup_v1>
+	<WAA_Message_SpawnGroup_v2>A group of {0} wild {1}s appeared!</WAA_Message_SpawnGroup_v2>
 
 </LanguageData>

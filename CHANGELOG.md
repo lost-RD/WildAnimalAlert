@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.6
+
+### Build 11_20251212
+* 1.6 update
+* Uses transpiler patch rather than prefix to broaden compatibility with other mods  
+
 ## 1.5
 
 ### Build 10_20240423
